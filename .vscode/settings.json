@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "player.h": "c",
+        "citro3d.h": "c",
+        "stb_image.h": "c",
+        "stdlib.h": "c",
+        "png.h": "c",
+        "graphics.h": "c",
+        "platforms.h": "c"
+    }
+}
