@@ -47,6 +47,15 @@ int a = 0;
 int i = 0;
 bool init = false;
 
+int boost;
+
+
+typedef struct {
+    float x;
+    float y;
+    u32 currentlyPressed; // not sure how the 3ds handles that but you could use this for buttons like abyx
+} inputs;
+
 void Ajustoffset(char* vartoajust, float offsetofvar){ // Scrolling
 	if (strcmp(vartoajust, "X") == 0) offsetX = offsetX + offsetofvar;
 	if (strcmp(vartoajust, "Y") == 0) offsetY = offsetY + offsetofvar;
@@ -63,20 +72,33 @@ int keysmove(int select){
 	u32 kHeld = hidKeysHeld();
 	if (select == 1){
 
-        if (pos.dx > 80 || kHeld & KEY_DRIGHT) directX = 1;
-        else if (pos.dx < -80 || kHeld & KEY_DLEFT) directX = -1;
+        if (pos.dx > 80 || kHeld & KEY_DRIGHT) 
+            directX = 1;
+        else if (pos.dx < -80 || kHeld & KEY_DLEFT)
+            directX = -1;
 
-        if (pos.dy > 80 || kHeld & KEY_DUP) directY = 1;
-        else if (pos.dy < -80 || kHeld & KEY_DDOWN) directY = -1;
 
-        if (directX == -1 && directY == 0) result = 7; //left
-        else if (directX == 0 && directY == -1) result = 5; //down
-        else if (directX == 1 && directY == 0) result = 3; //right
-        else if (directX == 0 && directY == 1) result = 1; //up
-        else if (directX == -1 && directY == -1) result = 6; //downleft
-        else if (directX == -1 && directY == 1) result = 8; //upleft
-        else if (directX == 1 && directY == -1) result = 4; //downright
-        else if (directX == 1 && directY == 1) result = 2; //upright
+        if (pos.dy > 80 || kHeld & KEY_DUP) 
+            directY = 1;
+        else if (pos.dy < -80 || kHeld & KEY_DDOWN)
+            directY = -1;
+
+        if (directX == -1 && directY == 0) 
+            result = 7; //left
+        else if (directX == 0 && directY == -1)
+            result = 5; //down
+        else if (directX == 1 && directY == 0)
+            result = 3; //right
+        else if (directX == 0 && directY == 1)
+            result = 1; //up
+        else if (directX == -1 && directY == -1)
+            result = 6; //downleft
+        else if (directX == -1 && directY == 1)
+            result = 8; //upleft
+        else if (directX == 1 && directY == -1)
+            result = 4; //downright
+        else if (directX == 1 && directY == 1)
+            result = 2; //upright
     }
 
 	if (select == 2){
@@ -87,27 +109,38 @@ int keysmove(int select){
 
 float calcHmomentum(float posX, float offsetX) { // Horizontal speed
     LRpress = false;
-    if (keysmove(1) == 2 || keysmove(1) == 3 || keysmove(1) == 4 || keysmove(1) == 6 || keysmove(1) == 7 || keysmove(1) == 8) LRpress = true;
+    int keysres = keysmove(1);
+    if ((keysres >= 2 || keysres <= 8) && keysres != 5 && keysres != 0)
+        LRpress = true;
 
     if (LRpress == true) {
         if (grounded == true) {
-            if (keysmove(1) == 7) Hmomentum = Hmomentum - acc[1];
-            else if (keysmove(1) == 3) Hmomentum = Hmomentum + acc[1];
+            if (keysmove(1) == 7) 
+                Hmomentum = Hmomentum - acc[1];
+            else if (keysmove(1) == 3)
+                Hmomentum = Hmomentum + acc[1];
         }
         else if (grounded == false) {
-            if (keysmove(1) == 7) Hmomentum = Hmomentum - acc[2];
-            else if (keysmove(1) == 3) Hmomentum = Hmomentum + acc[2];
+            if (keysmove(1) == 7)
+                Hmomentum = Hmomentum - acc[2];
+            else if (keysmove(1) == 3)
+                Hmomentum = Hmomentum + acc[2];
         }
     }
 
     else if (LRpress == false && Hmomentum != 0) {
-        if (Hmomentum > 0.7f) Hmomentum = Hmomentum - 0.2f;
-    	if (Hmomentum < -0.7f) Hmomentum = Hmomentum + 0.2f;
-    	if (Hmomentum > -0.7f && Hmomentum < 0.7f) Hmomentum = 0;
+        if (Hmomentum > 0.7f)
+            Hmomentum = Hmomentum - 0.2f;
+    	if (Hmomentum < -0.7f)
+            Hmomentum = Hmomentum + 0.2f;
+    	if (Hmomentum > -0.7f && Hmomentum < 0.7f)
+            Hmomentum = 0;
     }
 
-    if (Hmomentum > 5) Hmomentum = 5;
-    else if (Hmomentum < -5) Hmomentum = -5;
+    if (Hmomentum > 5)
+        Hmomentum = 5;
+    else if (Hmomentum < -5)
+        Hmomentum = -5;
 
     Ajustoffset("X", ajustoX);
     Ajustoffset("pX", ajustpX);
@@ -148,8 +181,10 @@ float calcVmomentum(float locY, float offsetY, int apress, float boost){
 
     if (offsetY > 0) ajustoY = ajustoY - offsetY;
 
- 	if (grounded == true && Vmomentum > 0) Vmomentum = 0;
- 	if (grounded == false) Vmomentum = Vmomentum + 0.15f;
+ 	if (grounded == true && Vmomentum > 0)
+        Vmomentum = 0;
+ 	if (grounded == false) 
+        Vmomentum = Vmomentum + 0.15f;
  	grounded = false;
 
     Ajustoffset("Y", ajustoY);
@@ -157,7 +192,9 @@ float calcVmomentum(float locY, float offsetY, int apress, float boost){
     ajustpY = 0, ajustoY = 0, Vmomajust = 0;
 
     float tempvmom = 0;
-    tempvmom = Vmomentum - boost;
+    tempvmom = Vmomentum + boost;
+    printf("%f\n", boost);
+    boost = -100.0f;
     return tempvmom;
 }
 
@@ -254,8 +291,6 @@ int main(int argc, char **argv)
     int C = 0;
 
     int charge = 0;
-    int boost = 0;
-
     bool showPlatforms = true;
 
     while (aptMainLoop())
@@ -339,13 +374,18 @@ int main(int argc, char **argv)
 
 
         if (kUp & KEY_B && charge > 0 && grounded == true) {
-            boost--;
-            charge--;
+            boost = (-0.85f * charge);
+            charge = 0;
         }
+
+        if (boost != 0) boost = boost + 0.8f;
+
+        printf("%i\n", charge);
 
         posX = posX + calcHmomentum(posX, offsetX);
 
-        posY = posY + calcVmomentum(posY, offsetY, aapress, boost);    
+        posY = posY + calcVmomentum(posY, offsetY, aapress, boost);
+        
 
         aapress = 0;
 
