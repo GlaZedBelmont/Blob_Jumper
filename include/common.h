@@ -7,6 +7,7 @@
 C2D_TextBuf g_staticBuf, g_dynamicBuf;
 C2D_Text g_staticText[3];
 
+
 #define WHITE                 C2D_Color32(255, 255, 255, 255)
 #define BLACK                 C2D_Color32(0, 0, 0, 255)
 #define RED                   C2D_Color32(255, 0, 0, 255)

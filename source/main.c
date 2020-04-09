@@ -119,7 +119,7 @@ float calcHmomentum(float posX, float offsetX) { // Horizontal speed
     
 }
 
-float calcVmomentum(float locY, float offsetY, int apress){
+float calcVmomentum(float locY, float offsetY, int apress, float boost){
     //printf("%f\n", offsetY);
 	if (Vmomajust != 0) Vmomentum = Vmomentum + Vmomajust;
 
@@ -157,7 +157,7 @@ float calcVmomentum(float locY, float offsetY, int apress){
     ajustpY = 0, ajustoY = 0, Vmomajust = 0;
 
     float tempvmom = 0;
-    tempvmom = Vmomentum;
+    tempvmom = Vmomentum - boost;
     return tempvmom;
 }
 
@@ -169,40 +169,44 @@ typedef struct player { // Blob characteristics
 player blob;
 
 
+
+
 int platcoll(int locX, int locY, float posX, float posY, int pWidth, int pHeight) { // loc = platform, pos = player, pWidth/pHeight = dimensions
     printf("locX:%i  locY:%i\nposX:%f   posY:%f\nHmomentum:%f   Vmomentum:%f\n\nLRpress: %s\n", locX, locY, posX, posY, Hmomentum, Vmomentum, LRpress ? "true" : "false");
+    //printf("%i\n", locX + pWidth);
     C2D_DrawRectSolid(locX, locY, 0.5f, pWidth, 1, GREEN); // Top line
     C2D_DrawRectSolid(locX, locY + pHeight, 0.5f, pWidth, 1, GREEN); // Bottom line
     C2D_DrawRectSolid(locX, locY, 0.5f, 1, pHeight, GREEN); // Left line
     C2D_DrawRectSolid(locX + pWidth, locY, 0.5f, 1, pHeight, GREEN); // Right line
 
-    if (posX > locX && posX + blob.width < locX + pWidth) { // Is the player between the left and right hitboxes of a platform // // if blob.left is past   // posX < locX + topright && posX + blob.width > locX
-        if (posY < locY + pHeight && posY + blob.height >= locY) {
-            posY = locY;
+    //if (posX < locX + pWidth) printf()
+
+    if ((posX < locX + pWidth && posX > locX) || (posX + blob.width > locX && posX < locX + pWidth)) { // Is the player between the left and right hitboxes of a platform // // if blob.left is past   // posX < locX + topright && posX + blob.width > locX
+        if (posY + blob.height >= locY + 2 && posY <= locY + pHeight) {
+        //    posY = locY;
             
             // Check if player touched left side or right side
-            if (posX + blob.width > locX) { // Left
+            if (posX + blob.width > locX && posX + blob.width < locX + pWidth / 2) { // Left
                 Hmomentum = -Hmomentum;
                 printf("Player is touching the left side\n");
             }
-            else if (posX < locX + pWidth) { // Right
-                Hmomentum = +Hmomentum;
+            else if (posX < locX + pWidth && posX > locX + pWidth / 2) { // Right
+                Hmomentum = -Hmomentum;
                 printf("Player is touching the right side\n");
             }
-
-            posX = locX;
+            //posX = locX;
         }
 
         if (posY + blob.height >= locY) { // Did the player go through the platform
 
-            if (posY + blob.height > locY) { // Is the player on top? aka "higher" than the top
-                posY = locY;
+            if (posY + blob.height <= locY + pHeight / 2) { // Is the player on top? aka "higher" than the top
+                posY = locY - 5;
                 grounded = true;
                 printf("Player is touching the top\n");
                 Vmomentum = 0;
             }
 
-            else if (posY <= locY + pHeight && posY < locY) { // Is the player under? aka approx height of platform - blob height which equal ~10-15
+            else if (posY <= locY + pHeight && posY >= locY + pHeight -2) { // Is the player under? aka approx height of platform - blob height which equal ~10-15
                 posY = locY + 32;
                 printf("Player is touching the bottom\n");
                 Vmomentum = 0.15f;
@@ -249,7 +253,11 @@ int main(int argc, char **argv)
     posY = 80, posX = 80;
     int C = 0;
 
+    int charge = 0;
+    int boost = 0;
+
     bool showPlatforms = true;
+
     while (aptMainLoop())
     {
 
@@ -325,9 +333,19 @@ int main(int argc, char **argv)
         if (C > 5) C = 0;
         if (C < 0) C = 5;
 
+
+        if (kHeld & KEY_B && charge < blob.width) charge++;
+        else if (charge != 0) charge--;
+
+
+        if (kUp & KEY_B && charge > 0 && grounded == true) {
+            boost--;
+            charge--;
+        }
+
         posX = posX + calcHmomentum(posX, offsetX);
 
-        posY = posY + calcVmomentum(posY, offsetY, aapress);    
+        posY = posY + calcVmomentum(posY, offsetY, aapress, boost);    
 
         aapress = 0;
 
@@ -338,6 +356,7 @@ int main(int argc, char **argv)
 
         //printf("X:%f\nY:%f\n", posX, posY);
 
+        C2D_DrawRectSolid(posX, posY - 5, 0.0f, charge, blob.height / 5, C2D_Color32(255, 0, 0, 255));
         C2D_DrawImageAt(neutral, posX, posY, 0.5f, NULL, 1, 1);
 
         C2D_DrawRectSolid(posX, posY, 0.5f, blob.width, 1, RED); // Top line
