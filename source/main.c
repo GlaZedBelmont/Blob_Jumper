@@ -156,11 +156,11 @@ float calcVmomentum(float locY, float offsetY, int apress, float boost){
     //printf("%f\n", offsetY);
 	if (Vmomajust != 0) Vmomentum = Vmomentum + Vmomajust;
 
- 	if (locY < 50 && Vmomentum < 0) { 
+ 	if (locY < 100 && Vmomentum < 0) { 
         ajustpY = ajustpY - Vmomentum;
         ajustoY = ajustoY + Vmomentum;
     }
-    else if (locY < 50 && Vmomentum == 0) {
+    else if (locY < 100 && Vmomentum == 0) {
         ajustpY = ajustpY + 1;
         ajustoY = ajustoY - 1;
     }
@@ -185,6 +185,7 @@ float calcVmomentum(float locY, float offsetY, int apress, float boost){
         Vmomentum = 0;
  	if (grounded == false) 
         Vmomentum = Vmomentum + 0.15f;
+
  	grounded = false;
 
     Ajustoffset("Y", ajustoY);
@@ -194,7 +195,6 @@ float calcVmomentum(float locY, float offsetY, int apress, float boost){
     float tempvmom = 0;
     tempvmom = Vmomentum + boost;
     printf("%f\n", boost);
-    boost = -100.0f;
     return tempvmom;
 }
 
@@ -209,10 +209,9 @@ player blob;
 
 
 int platcoll(int locX, int locY, float posX, float posY, int pWidth, int pHeight) { // loc = platform, pos = player, pWidth/pHeight = dimensions
-    printf("locX:%i  locY:%i\nposX:%f   posY:%f\nHmomentum:%f   Vmomentum:%f\n\nLRpress: %s\n", locX, locY, posX, posY, Hmomentum, Vmomentum, LRpress ? "true" : "false");
     //printf("%i\n", locX + pWidth);
     C2D_DrawRectSolid(locX, locY, 0.5f, pWidth, 1, GREEN); // Top line
-    C2D_DrawRectSolid(locX, locY + pHeight, 0.5f, pWidth, 1, GREEN); // Bottom line
+    C2D_DrawRectSolid(locX, locY + pHeight , 0.5f, pWidth, 1, GREEN); // Bottom line
     C2D_DrawRectSolid(locX, locY, 0.5f, 1, pHeight, GREEN); // Left line
     C2D_DrawRectSolid(locX + pWidth, locY, 0.5f, 1, pHeight, GREEN); // Right line
 
@@ -335,6 +334,8 @@ int main(int argc, char **argv)
         C2D_SceneBegin(top);
         C2D_TargetClear(top, BLACK);
 
+        printf("posX:%f   posY:%f\nHmomentum:%f   Vmomentum:%f\n\nLRpress: %s\n", posX, posY, Hmomentum, Vmomentum, LRpress ? "true" : "false");
+
         if (showPlatforms == true) {
             for (i = 0; i < 6; i++) {
                 C2D_DrawImageAt(getplatform(1), LocX[i], LocY[i] - offsetY, 0.5f, NULL, 1, 1);
@@ -346,13 +347,13 @@ int main(int argc, char **argv)
         //C2D_DrawRectangle(0, 0, 0.5f, 400, 240, RED, YELLOW, GREEN, BLUE);
 
 
-        /*i = 0;
+        i = 0;
         while (i < 5) {
-            platcoll(LocX[i], LocY[i], posX, posY, dimensions[0], dimensions[1]);
+            platcoll(LocX[i], LocY[i] - offsetY, posX, posY, dimensions[0], dimensions[1]);
             i++;
-        }*/
+        }
 
-        platcoll(LocX[C], LocY[C]- offsetY, posX, posY, dimensions[0], dimensions[1]);
+        //platcoll(LocX[C], LocY[C]- offsetY, posX, posY, dimensions[0], dimensions[1]);
 
 //        C2D_DrawRectangle(LocX[C], LocY[C], 0.5f, dimensions[0], dimensions[1], RED, GREEN, BLUE, YELLOW);
         
@@ -396,7 +397,7 @@ int main(int argc, char **argv)
 
         //printf("X:%f\nY:%f\n", posX, posY);
 
-        C2D_DrawRectSolid(posX, posY - 5, 0.0f, charge, blob.height / 5, C2D_Color32(255, 0, 0, 255));
+        C2D_DrawRectSolid(posX, posY - 5, 0.0f, charge, blob.height / 5, C2D_Color32(10 * charge, 0, 0, 255));
         C2D_DrawImageAt(neutral, posX, posY, 0.5f, NULL, 1, 1);
 
         C2D_DrawRectSolid(posX, posY, 0.5f, blob.width, 1, RED); // Top line
